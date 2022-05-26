@@ -59,6 +59,7 @@ from rucio.db.sqla.constants import RequestType
 from rucio.transfertool.fts3 import FTS3Transfertool
 from rucio.transfertool.globus import GlobusTransferTool
 from rucio.transfertool.mock import MockTransfertool
+from rucio.transfertool.simplett import SimpleTransfertool
 
 graceful_stop = threading.Event()
 
@@ -73,6 +74,7 @@ TRANSFERTOOL_CLASSES_BY_NAME = {
     'fts3': FTS3Transfertool,
     'globus': GlobusTransferTool,
     'mock': MockTransfertool,
+    'simplett': SimpleTransfertool
 }
 
 
