@@ -45,6 +45,7 @@ import time
 
 from dogpile.cache.api import NoValue
 from sqlalchemy.exc import DatabaseError
+from rucio.common.config import config_get
 
 import rucio.db.sqla.util
 from rucio.common.cache import make_region_memcached
@@ -71,10 +72,12 @@ graceful_stop = threading.Event()
 region = make_region_memcached(expiration_time=3600)
 
 
-def finisher(once=False, sleep_time=60, activities=None, bulk=100, db_bulk=1000, partition_wait_time=10):
+def finisher(once=False, sleep_time=60, activities=None, bulk=100, db_bulk=1000, partition_wait_time=None):
     """
     Main loop to update the replicas and rules based on finished requests.
     """
+    partition_wait_time = float(config_get('conveyor', 'partition_wait_time', default_value=10))
+
     try:
         conveyor_config = {item[0]: item[1] for item in items('conveyor')}
     except ConfigNotFound:
