@@ -297,6 +297,12 @@ class DirectTransferDefinition:
         self._dest_url = None
         self._legacy_sources = None
 
+    def to_json(self):
+        return {
+            'legacy_sources': self.legacy_sources,
+            'dest_url': self.dest_url
+        }
+
     def __str__(self):
         return '{sources}--{request_id}->{destination}'.format(
             sources=','.join([str(s.rse) for s in self.sources]),

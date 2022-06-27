@@ -72,13 +72,21 @@ class SimpleTransfertool(Transfertool):
 
     def submit(self, files, job_params, timeout=None):
         logging.info("%s sumbitting files %s with job_params %s", self, files, job_params)
+
+        requestid = str(uuid.uuid1())
+
         for file in files:
             logging.info("file: %s", str(file))
             logging.info("--- %s", file.dest_url)
             for src in file.legacy_sources:
                 logging.info("--- %s", src)
-        raise NotImplementedError
-        return str(uuid.uuid1())
+
+        with open(f"simplett-request-{requestid}.json", "w") as f:
+            json.dump([
+                file.to_json() for file in files
+            ], f)
+            
+        return requestid
 
     def cancel(self, transfer_ids, timeout=None):
         return True
