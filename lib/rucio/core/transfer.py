@@ -702,7 +702,6 @@ def bulk_query_transfers(request_host, transfers_by_eid, transfertool='fts3', vo
         # record_timer('core.request.bulk_query_transfers', (time.time() - start_time) * 1000 / len(transfers_by_eid))
 
         for k, v in responses.items():
-            v = 'SUCCEEDED'
             if v == 'FAILED':
                 new_state = RequestState.FAILED
             elif v == 'SUCCEEDED':

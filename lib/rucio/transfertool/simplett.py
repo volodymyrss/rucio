@@ -1,6 +1,9 @@
 import datetime
 import itertools
 import json
+import os
+import re
+import shutil
 from typing import Optional
 
 from aiohttp import RequestInfo
@@ -70,6 +73,9 @@ class SimpleTransfertool(Transfertool):
             }
         ]
 
+    def request_id_fn(self, requestid):
+        return f"simplett-request-{requestid}.json"
+
     def submit(self, files, job_params, timeout=None):
         logging.info("%s sumbitting files %s with job_params %s", self, files, job_params)
 
@@ -81,7 +87,7 @@ class SimpleTransfertool(Transfertool):
             for src in file.legacy_sources:
                 logging.info("--- %s", src)
 
-        with open(f"simplett-request-{requestid}.json", "w") as f:
+        with open(self.request_id_fn(requestid), "w") as f:
             json.dump([
                 file.to_json() for file in files
             ], f)
@@ -94,16 +100,37 @@ class SimpleTransfertool(Transfertool):
     def update_priority(self, transfer_id, priority, timeout=None):
         return True
 
+    def transfer_file(self, src: str, dest: str):
+        logging.info("tranferring %s => %s", src, dest)
+
+        if not (src.startswith("posix://") and dest.startswith("posix://")):
+            raise NotImplementedError("for now, we only support posix pfns!")
+    
+        src_fn = re.sub('^posix://posix', '', src) # TODO: exclude host
+        dest_fn = re.sub('^posix://posix', '', dest)
+    
+        os.makedirs(os.path.dirname(dest_fn), exist_ok=True)
+
+        logging.info("src_fn %s", src_fn)        
+        logging.info("dest_fn %s", dest_fn)        
+
+        shutil.copyfile(src_fn, dest_fn)
+
 
     def transfer_now(self, transfer):        
-        raise NotImplementedError
+        logging.info("transfer now for record: %s", json.dumps(transfer, indent=4, sort_keys=True))
+        for transfer_file in transfer:
+            self.transfer_file(transfer_file['legacy_sources'][0][1], transfer_file['dest_url'])
+
+
 
     def query(self, transfer_ids: list, details=False, timeout=None, transfers_by_eid=None):
         if transfers_by_eid is None:
             transfers_by_eid = {}
 
         for transfer_id in transfer_ids:
-            for transfer in transfers_by_eid.get(transfer_id, []):
+            with open(self.request_id_fn(transfer_id)) as f:
+                transfer = json.load(f)                
                 self.transfer_now(transfer)
 
         def map_some_fields(d):
@@ -119,18 +146,7 @@ class SimpleTransfertool(Transfertool):
             }
 
         return {
-            transfer_id: {
-                transfer["id"]: {
-                    "request_id": transfer["id"],
-                    "transfer_id": transfer_id,
-                    "comment": f"Not Real for {transfer_id}!",
-                    "status": "ok",
-                    "new_state": RequestState.DONE,
-                    **map_some_fields(transfer)
-                }
-                for transfer in transfers_by_eid.get(transfer_id, [])
-            }
-            for transfer_id in transfer_ids
+            transfer_id: "SUCCEEDED" for transfer_id in transfer_ids
         }
 
     def bulk_query(self, transfer_ids: list, timeout: Optional[float]):
