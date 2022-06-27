@@ -98,7 +98,7 @@ def should_retry_request(req, retry_protocol_mismatches):
     if req['state'] == RequestState.NO_SOURCES or req['state'] == RequestState.ONLY_TAPE_SOURCES:
         return False
     # hardcoded for now - only requeue a couple of times
-    if req['retry_count'] is None or req['retry_count'] < 3:
+    if req['retry_count'] is None or req['retry_count'] < 30:
         if req['state'] == RequestState.MISMATCH_SCHEME:
             return retry_protocol_mismatches
         return True

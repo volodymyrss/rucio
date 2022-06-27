@@ -71,7 +71,13 @@ class SimpleTransfertool(Transfertool):
         ]
 
     def submit(self, files, job_params, timeout=None):
-        logging.info("%s sumbitting files %s with job_params %s", self, files, job_params)        
+        logging.info("%s sumbitting files %s with job_params %s", self, files, job_params)
+        for file in files:
+            logging.info("file: %s", str(file))
+            logging.info("--- %s", file.dest_url)
+            for src in file.legacy_sources:
+                logging.info("--- %s", src)
+        raise NotImplementedError
         return str(uuid.uuid1())
 
     def cancel(self, transfer_ids, timeout=None):

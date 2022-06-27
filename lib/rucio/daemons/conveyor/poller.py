@@ -71,12 +71,8 @@ def poller(once=False, activities=None, sleep_time=60,
     Main loop to check the status of a transfer primitive with a transfertool.
     """
     
-    try:
-        partition_wait_time = config_get('conveyor', 'partition_wait_time')
-        partition_wait_time = float(partition_wait_time)
-    except NoOptionError:
-        partition_wait_time = 10
-
+    partition_wait_time = float(config_get('conveyor', 'partition_wait_time', default_value=10))
+    
     try:
         timeout = config_get('conveyor', 'poll_timeout')
         timeout = float(timeout)

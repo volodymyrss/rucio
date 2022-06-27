@@ -270,8 +270,10 @@ def __handle_requests(reqs, suspicious_patterns, retry_protocol_mismatches, logg
                     logger(logging.WARNING, 'Cannot find request %s anymore', req['request_id'])
 
             # All other failures
+            
             elif req['state'] in failed_during_submission or req['state'] in failed_no_submission_attempts:
-                if req['state'] in failed_during_submission and req['updated_at'] > (datetime.datetime.utcnow() - datetime.timedelta(minutes=120)):
+                failed_submission_retry_in_minutes = float(config_get("conveyor", "failed_submission_retry_in_minutes", default_value=120))
+                if req['state'] in failed_during_submission and req['updated_at'] > (datetime.datetime.utcnow() - datetime.timedelta(minutes=failed_submission_retry_in_minutes)):
                     # To prevent race conditions
                     continue
                 try:
@@ -293,6 +295,8 @@ def __handle_requests(reqs, suspicious_patterns, retry_protocol_mismatches, logg
                         replicas[req['request_type']][req['rule_id']].append(replica)
                 except RequestNotFound:
                     logger(logging.WARNING, 'Cannot find request %s anymore', req['request_id'])
+            else:
+                logger(logging.WARNING, 'untreated state', req['state'])
 
         except Exception as error:
             logger(logging.ERROR, "Something unexpected happened when handling request %s(%s:%s) at %s: %s" % (req['request_id'],
