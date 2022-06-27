@@ -79,6 +79,7 @@ from rucio.db.sqla.util import create_temp_table
 from rucio.rse import rsemanager as rsemgr
 from rucio.transfertool.transfertool import Transfertool, TransferToolBuilder
 from rucio.transfertool.fts3 import FTS3Transfertool
+from rucio.transfertool.simplett import SimpleTransfertool
 
 if TYPE_CHECKING:
     from typing import Any, Callable, Dict, Generator, Iterable, List, Optional, Set, Tuple, Type, Union
@@ -685,6 +686,24 @@ def bulk_query_transfers(request_host, transfers_by_eid, transfertool='fts3', vo
                 new_state = RequestState.DONE
             else:
                 new_state = RequestState.SUBMITTED
+            responses[k] = {t['request_id']: fake_transfertool_response(t, new_state=new_state)
+                            for t in transfers_by_eid[k]}
+        return responses
+    elif transfertool == 'simplett':
+        start_time = time.time()
+        logger(logging.DEBUG, 'transfer_ids: %s' % list(transfers_by_eid))
+        responses = SimpleTransfertool(external_host=None).bulk_query(transfer_ids=list(transfers_by_eid), timeout=timeout)
+        # record_timer('core.request.bulk_query_transfers', (time.time() - start_time) * 1000 / len(transfers_by_eid))
+
+        for k, v in responses.items():
+            v = 'FAILED'
+            if v == 'FAILED':
+                new_state = RequestState.FAILED
+            elif v == 'SUCCEEDED':
+                new_state = RequestState.DONE
+            else:
+                new_state = RequestState.SUBMITTED
+                
             responses[k] = {t['request_id']: fake_transfertool_response(t, new_state=new_state)
                             for t in transfers_by_eid[k]}
         return responses

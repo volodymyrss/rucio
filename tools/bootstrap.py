@@ -24,6 +24,10 @@ os.chdir(base_path)
 
 from rucio.db.sqla.util import (build_database, create_base_vo, create_root_account)  # noqa: E402
 
+import logging
+logging.basicConfig()
+logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
+
 if __name__ == '__main__':
     build_database()
     create_base_vo()

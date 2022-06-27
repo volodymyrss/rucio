@@ -44,7 +44,7 @@ from rucio.common import exception
 
 
 def config_get(section, option, raise_exception=True, default=None, clean_cached=False, check_config_table=True,
-               session=None, use_cache=True, expiration_time=3600):
+               session=None, use_cache=True, expiration_time=3600, default_value=None):
     """
     Return the string value for a given option in a section
 
@@ -72,9 +72,12 @@ def config_get(section, option, raise_exception=True, default=None, clean_cached
     global __CONFIG
     from rucio.common.utils import is_client
     client_mode = is_client()
-    try:
+    try:        
         return get_config().get(section, option)
     except (ConfigParser.NoOptionError, ConfigParser.NoSectionError, RuntimeError) as err:
+        if isinstance(err, ConfigParser.NoOptionError) and default_value is not None:
+            return default_value
+            
         if not client_mode and check_config_table:
             try:
                 return __config_get_table(section=section, option=option, raise_exception=raise_exception,

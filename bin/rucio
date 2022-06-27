@@ -95,6 +95,9 @@ from rucio.common.utils import sizefmt, Color, detect_client_location, chunks, p
 from rucio.common.constants import ReplicaState
 from rucio.rse.protocols.protocol import RSEProtocol
 
+from rucio.core.rse import get_rse_id
+from rucio.core.request import list_requests
+
 EXTRA_MODULES = import_extras(['argcomplete'])
 
 if EXTRA_MODULES['argcomplete']:
@@ -1858,6 +1861,27 @@ def touch(args):
         client.touch(scope, name, args.rse)
 
 
+def requests_lister(args):
+    # """
+    # %(prog)s touch [options] <did1 did2 ...>
+    # """
+
+    client = get_client(args)
+
+    # for did in args.dids:
+    #     scope, name = get_scope(did, client)
+    #     client.touch(scope, name, args.rse)
+
+    all_rses = list(client.list_rses())
+
+    print("all rses", [r['rse'] for r in all_rses])
+    all_rse_ids = [r['id'] for r in all_rses]
+
+    for request in list_requests(all_rse_ids, all_rse_ids):
+        for k, v in request.to_dict().items():
+            print(f"\033[32m{str(k):30s}\033[0m {str(v):50s}")
+
+
 def rse_completer(prefix, parsed_args, **kwargs):
     """
     Completes the argument with a list of RSEs
@@ -2526,6 +2550,13 @@ can be found in ' + Color.BOLD + 'http://rucio.cern.ch/documentation/rse_express
     touch_parser.set_defaults(function=touch)
     touch_parser.add_argument(dest='dids', nargs='+', action='store', help='List of space separated data identifiers.')
     touch_parser.add_argument('--rse', dest='rse', action='store', help="The RSE of the DIDs that are touched.").completer = rse_completer
+
+
+    
+    touch_parser = subparsers.add_parser('requests', help='Touch one or more DIDs and set the last accessed date to the current date')
+    touch_parser.set_defaults(function=requests_lister)
+    # touch_parser.add_argument(dest='dids', nargs='+', action='store', help='List of space separated data identifiers.')
+    # touch_parser.add_argument('--rse', dest='rse', action='store', help="The RSE of the DIDs that are touched.").completer = rse_completer    
 
     return oparser
 

@@ -66,10 +66,16 @@ FILTER_TRANSFERTOOL = config_get('conveyor', 'filter_transfertool', False, None)
 
 
 def poller(once=False, activities=None, sleep_time=60,
-           fts_bulk=100, db_bulk=1000, older_than=60, activity_shares=None, partition_wait_time=10):
+           fts_bulk=100, db_bulk=1000, older_than=60, activity_shares=None, partition_wait_time=None):
     """
     Main loop to check the status of a transfer primitive with a transfertool.
     """
+    
+    try:
+        partition_wait_time = config_get('conveyor', 'partition_wait_time')
+        partition_wait_time = float(partition_wait_time)
+    except NoOptionError:
+        partition_wait_time = 10
 
     try:
         timeout = config_get('conveyor', 'poll_timeout')
@@ -90,7 +96,7 @@ def poller(once=False, activities=None, sleep_time=60,
 
     with HeartbeatHandler(executable=executable, logger_prefix=logger_prefix) as heartbeat_handler:
         logger = heartbeat_handler.logger
-        logger(logging.INFO, 'Poller starting - db_bulk (%i) fts_bulk (%i) timeout (%s)' % (db_bulk, fts_bulk, timeout))
+        logger(logging.INFO, 'Poller starting - db_bulk (%i) fts_bulk (%i) timeout (%s) partition_wait_time: %s' % (db_bulk, fts_bulk, timeout, partition_wait_time))
         activity_next_exe_time = defaultdict(time.time)
 
         if partition_wait_time:

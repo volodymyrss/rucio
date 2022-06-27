@@ -1,6 +1,7 @@
 import datetime
 import itertools
 import json
+from typing import Optional
 
 from aiohttp import RequestInfo
 
@@ -70,6 +71,7 @@ class SimpleTransfertool(Transfertool):
         ]
 
     def submit(self, files, job_params, timeout=None):
+        logging.info("%s sumbitting files %s with job_params %s", self, files, job_params)        
         return str(uuid.uuid1())
 
     def cancel(self, transfer_ids, timeout=None):
@@ -79,15 +81,15 @@ class SimpleTransfertool(Transfertool):
         return True
 
 
-    def transfer_now(self, transfer):
+    def transfer_now(self, transfer):        
         raise NotImplementedError
 
-    def query(self, transfer_ids, details=False, timeout=None, transfers_by_eid=None):
+    def query(self, transfer_ids: list, details=False, timeout=None, transfers_by_eid=None):
         if transfers_by_eid is None:
             transfers_by_eid = {}
 
         for transfer_id in transfer_ids:
-            for transfer in transfers_by_eid[transfer_id]:
+            for transfer in transfers_by_eid.get(transfer_id, []):
                 self.transfer_now(transfer)
 
         def map_some_fields(d):
@@ -112,7 +114,11 @@ class SimpleTransfertool(Transfertool):
                     "new_state": RequestState.DONE,
                     **map_some_fields(transfer)
                 }
-                for transfer in transfers_by_eid[transfer_id]
+                for transfer in transfers_by_eid.get(transfer_id, [])
             }
             for transfer_id in transfer_ids
         }
+
+    def bulk_query(self, transfer_ids: list, timeout: Optional[float]):
+        return self.query(transfer_ids)
+        

@@ -20,6 +20,11 @@ from argparse import ArgumentParser  # noqa: E402
 
 from rucio.db.sqla.util import build_database, destroy_database, drop_everything, create_root_account, create_base_vo  # noqa: E402
 
+
+import logging
+logging.basicConfig()
+logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
+
 if __name__ == '__main__':
 
     parser = ArgumentParser()

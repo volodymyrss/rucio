@@ -78,7 +78,7 @@ TRANSFERTOOL_CLASSES_BY_NAME = {
 }
 
 
-def submitter(once=False, rses=None, partition_wait_time=10,
+def submitter(once=False, rses=None, partition_wait_time=None,
               bulk=100, group_bulk=1, group_policy='rule', source_strategy=None,
               activities=None, sleep_time=600, max_sources=4, archive_timeout_override=None,
               filter_transfertool=FILTER_TRANSFERTOOL, transfertool=TRANSFER_TOOL,
@@ -87,10 +87,13 @@ def submitter(once=False, rses=None, partition_wait_time=10,
     Main loop to submit a new transfer primitive to a transfertool.
     """
 
+    partition_wait_time = float(config_get('conveyor', 'partition_wait_time', default_value=10))
+    
     try:
         partition_hash_var = config_get('conveyor', 'partition_hash_var')
     except NoOptionError:
         partition_hash_var = None
+
     try:
         scheme = config_get('conveyor', 'scheme')
     except NoOptionError:
@@ -141,7 +144,7 @@ def submitter(once=False, rses=None, partition_wait_time=10,
 
     with HeartbeatHandler(executable=executable, logger_prefix=logger_prefix) as heartbeat_handler:
         logger = heartbeat_handler.logger
-        logger(logging.INFO, 'Submitter starting with timeout %s', timeout)
+        logger(logging.INFO, 'Submitter starting with timeout %s, partition_wait_time %s', timeout, partition_wait_time)
 
         if partition_wait_time:
             graceful_stop.wait(partition_wait_time)
