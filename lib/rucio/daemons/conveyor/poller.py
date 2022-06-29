@@ -66,11 +66,12 @@ FILTER_TRANSFERTOOL = config_get('conveyor', 'filter_transfertool', False, None)
 
 
 def poller(once=False, activities=None, sleep_time=60,
-           fts_bulk=100, db_bulk=1000, older_than=60, activity_shares=None, partition_wait_time=None):
+           fts_bulk=100, db_bulk=1000, older_than=None, activity_shares=None, partition_wait_time=None):
     """
     Main loop to check the status of a transfer primitive with a transfertool.
     """
     
+    older_than = float(config_get('conveyor', 'poll_older_than', default_value=60))
     partition_wait_time = float(config_get('conveyor', 'partition_wait_time', default_value=10))
     
     try:
