@@ -45,6 +45,9 @@ from rucio.core.oidc import get_token_for_account_operation
 from rucio.core.monitor import record_counter, record_timer, MultiCounter
 from rucio.transfertool.transfertool import Transfertool, TransferToolBuilder
 
+from rucio.db.sqla.session import read_session
+from rucio.core.request import get_request
+
 logging.getLogger("requests").setLevel(logging.CRITICAL)
 disable_warnings()
 

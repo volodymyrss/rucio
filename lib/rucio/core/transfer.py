@@ -77,6 +77,7 @@ from rucio.db.sqla.constants import DIDType, RequestState, RSEType, RequestType,
 from rucio.db.sqla.session import read_session, transactional_session
 from rucio.db.sqla.util import create_temp_table
 from rucio.rse import rsemanager as rsemgr
+from rucio.transfertool.simplett import SimpleTransfertool
 from rucio.transfertool.transfertool import Transfertool, TransferToolBuilder
 from rucio.transfertool.fts3 import FTS3Transfertool
 from rucio.transfertool.simplett import SimpleTransfertool
