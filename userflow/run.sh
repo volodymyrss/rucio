@@ -1,11 +1,18 @@
 fn=cta1Mb-${file_id:?}
 scope=${scope:-ctaarc}
 
+set -x
+
 function admin() {
 	rucio-admin account add-attribute --key admin --value 1 root
 	rucio-admin account list --filter "admin=1"
+
 }
 
+
+function scope() {
+        rucio-admin scope add --scope ctaarc --account root
+}
 
 
 
@@ -22,7 +29,7 @@ function protocol() {
 
 function upload() {
 	dd if=/dev/random of=$fn bs=1M count=1
-	rucio -v upload --scope $ctaarc --rse CTA-SITE $fn
+	rucio -v upload --scope $scope --rse CTA-SITE $fn
 }
 
 
@@ -61,18 +68,18 @@ function create-rses() {
 }
 
 function add-rule() {
-	# rucio add-dataset $ctaarc:file1M
-	rucio add-rule $ctaarc:$fn 3 'CTA-DC-0|CTA-DC-1|CTA-DC-2|CTA-DC-3' || true
-	rucio list-rules --file $ctaarc:$fn
+	# rucio add-dataset $scope:file1M
+	rucio add-rule $scope:$fn 3 'CTA-DC-0|CTA-DC-1|CTA-DC-2|CTA-DC-3' || true
+	rucio list-rules --file $scope:$fn
 }
 
 function add-rule-dataset() {
-	rucio add-dataset $ctaarc:ctaDS-A
-	rucio add-dataset $ctaarc:ctaDS-B
-	rucio add-rule $ctaarc:ctaDS-A 2 'CTA-DC-0|CTA-DC-1' || true
-	rucio add-rule $ctaarc:ctaDS-B 2 'CTA-DC-2|CTA-DC-3' || true
-	rucio list-rules --dataset $ctaarc:ctaDS-A
-	rucio list-rules --dataset $ctaarc:ctaDS-B
+	rucio add-dataset $scope:ctaDS-A
+	rucio add-dataset $scope:ctaDS-B
+	rucio add-rule $scope:ctaDS-A 2 'CTA-DC-0|CTA-DC-1' || true
+	rucio add-rule $scope:ctaDS-B 2 'CTA-DC-2|CTA-DC-3' || true
+	rucio list-rules --dataset $scope:ctaDS-A
+	rucio list-rules --dataset $scope:ctaDS-B
 }
 
 function flow() {
@@ -81,7 +88,7 @@ function flow() {
     upload # alternatively, add-replica
     #add-rule # if not attaching to dataset
 
-    rucio attach $ctaarc:ctaDS-A $ctaarc:$fn
+    rucio attach $scope:ctaDS-${file_id::1} $scope:$fn
     #rucio-judge-evaluator --run-once
 
     #rucio-conveyor-submitter --sleep-time 1 --run-once
@@ -93,8 +100,8 @@ function flow() {
 
 
     #rucio-conveyor-finisher --sleep-time 1 --run-once
-    #rucio list-file-replicas $ctaarc:$fn
-    #rucio list-rules --file $ctaarc:$fn
+    #rucio list-file-replicas $scope:$fn
+    #rucio list-rules --file $scope:$fn
 
     #rucio-judge-cleaner --run-once # delete expired rules
 }
