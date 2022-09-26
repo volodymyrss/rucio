@@ -1,3 +1,5 @@
+# superceeded by https://github.com/volodymyrss/cscs-bdms-tools/blob/bb7a09217b0e969b1a7fdd6312dc2caa378c5425/cscs-bdms-rucio.sh#L2
+
 fn=cta1Mb-${file_id:?}
 scope=${scope:-ctaarc}
 
