@@ -62,6 +62,7 @@ FILTER_TRANSFERTOOL = config_get('conveyor', 'filter_transfertool', False, None)
 def _fetch_requests(
         db_bulk: int,
         older_than: int,
+        processed_at_delay: int,
         activity_shares: Optional['Mapping[str, float]'],
         transfertool: Optional[str],
         filter_transfertool: Optional[str],
@@ -80,6 +81,7 @@ def _fetch_requests(
         request_type=[RequestType.TRANSFER, RequestType.STAGEIN, RequestType.STAGEOUT],
         state=[RequestState.SUBMITTED],
         processed_by=heartbeat_handler.short_executable if set_last_processed_by else None,
+        processed_at_delay=processed_at_delay,
         limit=db_bulk,
         older_than=datetime.datetime.utcnow() - datetime.timedelta(seconds=older_than) if older_than else None,
         total_workers=total_workers,
