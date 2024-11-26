@@ -168,6 +168,7 @@ def poller(
         fts_bulk: int = 100,
         db_bulk: int = 1000,
         older_than: int = 60,
+        processed_at_delay: int = 60,
         activity_shares: Optional['Mapping[str, float]'] = None,
         partition_wait_time: int = 10,
         transfertool: Optional[str] = TRANSFER_TOOL,
@@ -257,6 +258,7 @@ def run(
         fts_bulk: int = 100,
         db_bulk: int = 1000,
         older_than: int = 60,
+        processed_at_delay: int = 600,
         activity_shares: Optional[str] = None,
         total_threads: int = 1
 ) -> None:
@@ -294,6 +296,7 @@ def run(
         fts_bulk=fts_bulk,
         db_bulk=db_bulk,
         older_than=older_than,
+        processed_at_delay=processed_at_delay,
         sleep_time=sleep_time,
         activities=activities,
         activity_shares=parsed_activity_shares,
