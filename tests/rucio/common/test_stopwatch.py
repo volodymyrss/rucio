@@ -46,9 +46,9 @@ class TestStopwatch:
 
     @pytest.mark.parametrize('now_1,now_2,now_3',
                              [
-                                    (5000, 9000, 12000),
-                                    (1, 3, 7),
-                                    (50.03, 80.58, 99.99),
+                                 (5000, 9000, 12000),
+                                 (1, 3, 7),
+                                 (50.03, 80.58, 99.99),
                              ])
     @patch('rucio.common.stopwatch.time')
     def test_elapsed(self, mock_time, now_1, now_2, now_3):
